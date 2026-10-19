@@ -101,11 +101,13 @@ function(_gbaimp_host_configure_target tgt is_test prefix_lower)
         target_link_libraries(${tgt} PRIVATE
             gbarecomp_armv4t gbarecomp_gba gbarecomp_runtime gbarecomp_debug)
     endif()
-    if(UNIX AND NOT APPLE)
+    if(ANDROID)
+        target_link_libraries(${tgt} PRIVATE dl m)   # pthreads are part of Android's libc
+    elseif(UNIX AND NOT APPLE)
         target_link_libraries(${tgt} PRIVATE pthread dl m)
     endif()
 
-    if(NOT MSVC)
+    if(NOT MSVC AND NOT APPLE)  # Apple: compile-time renames in the host instead
         set(_wraps
             "-Wl,--wrap=SDL_PollEvent"
             "-Wl,--wrap=SDL_RenderPresent"
